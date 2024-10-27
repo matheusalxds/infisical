@@ -13,6 +13,7 @@ import {
   APIKeyData,
   AuthMethod,
   CreateAPIKeyRes,
+  CredentialHistory,
   DeletOrgMembershipDTO,
   OrgUser,
   RenameUserDTO,
@@ -444,5 +445,23 @@ export const useListUserGroupMemberships = (username: string) => {
 
       return data;
     }
+  });
+};
+
+export const useDeleteHistoryCredentials = () => {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest.delete(`/api/v3/users/credential-history/${id}`);
+    },
+  });
+};
+
+export const useCredentialsHistory = (userId: string) => {
+  return useQuery({
+    queryFn: async () => {
+      const { data } = await apiRequest.get<{ histories: CredentialHistory[] }>(`/api/v3/users/credential-history/${userId}`);
+      return data.histories
+    },
+    enabled: true
   });
 };

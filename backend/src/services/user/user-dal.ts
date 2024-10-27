@@ -98,6 +98,17 @@ export const userDALFactory = (db: TDbClient) => {
     }
   };
 
+  const findUserEncKeyLeanByUserId = async (userId: string, tx?: Knex) => {
+    try {
+      const user = await (tx || db.replicaNode())(TableName.UserEncryptionKey)
+        .where(`${TableName.UserEncryptionKey}.userId`, userId)
+        .first();
+      return user;
+    } catch (error) {
+      throw new DatabaseError({ error, name: "Find user enc by user id" });
+    }
+  };
+
   const findUserByProjectMembershipId = async (projectMembershipId: string) => {
     try {
       return await db
@@ -186,6 +197,7 @@ export const userDALFactory = (db: TDbClient) => {
     findUserEncKeyByUsername,
     findUserEncKeyByUserIdsBatch,
     findUserEncKeyByUserId,
+    findUserEncKeyLeanByUserId,
     updateUserEncryptionByUserId,
     findUserByProjectMembershipId,
     findUsersByProjectMembershipIds,

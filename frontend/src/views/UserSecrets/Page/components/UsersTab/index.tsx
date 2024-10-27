@@ -1,0 +1,1 @@
+export { CredentialsHistoryTab } from "./CredentialsHistoryTab";

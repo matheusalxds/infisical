@@ -31,6 +31,7 @@ import { TSecretSnapshotServiceFactory } from "@app/ee/services/secret-snapshot/
 import { TTrustedIpServiceFactory } from "@app/ee/services/trusted-ip/trusted-ip-service";
 import { TAuthMode } from "@app/server/plugins/auth/inject-identity";
 import { TApiKeyServiceFactory } from "@app/services/api-key/api-key-service";
+import { TAuthCredentialsHistoryFactory } from "@app/services/auth/auth-credential-history-service";
 import { TAuthLoginFactory } from "@app/services/auth/auth-login-service";
 import { TAuthPasswordFactory } from "@app/services/auth/auth-password-service";
 import { TAuthSignupFactory } from "@app/services/auth/auth-signup-service";
@@ -113,6 +114,7 @@ declare module "fastify" {
 
   interface FastifyInstance {
     services: {
+      authCredentialHistory: TAuthCredentialsHistoryFactory;
       login: TAuthLoginFactory;
       password: TAuthPasswordFactory;
       signup: TAuthSignupFactory;
