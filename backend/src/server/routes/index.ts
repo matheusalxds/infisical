@@ -81,6 +81,7 @@ import { readLimit } from "@app/server/config/rateLimiter";
 import { accessTokenQueueServiceFactory } from "@app/services/access-token-queue/access-token-queue";
 import { apiKeyDALFactory } from "@app/services/api-key/api-key-dal";
 import { apiKeyServiceFactory } from "@app/services/api-key/api-key-service";
+import { authCredentialHistoryServiceFactory } from "@app/services/auth/auth-credential-history-service";
 import { authDALFactory } from "@app/services/auth/auth-dal";
 import { authLoginServiceFactory } from "@app/services/auth/auth-login-service";
 import { authPaswordServiceFactory } from "@app/services/auth/auth-password-service";
@@ -106,6 +107,7 @@ import { externalMigrationServiceFactory } from "@app/services/external-migratio
 import { groupProjectDALFactory } from "@app/services/group-project/group-project-dal";
 import { groupProjectMembershipRoleDALFactory } from "@app/services/group-project/group-project-membership-role-dal";
 import { groupProjectServiceFactory } from "@app/services/group-project/group-project-service";
+import { authCredentialHistoryDALFactory } from "@app/services/history/auth-credential-history-dal";
 import { identityDALFactory } from "@app/services/identity/identity-dal";
 import { identityMetadataDALFactory } from "@app/services/identity/identity-metadata-dal";
 import { identityOrgDALFactory } from "@app/services/identity/identity-org-dal";
@@ -339,6 +341,7 @@ export const registerRoutes = async (
   const workflowIntegrationDAL = workflowIntegrationDALFactory(db);
 
   const externalGroupOrgRoleMappingDAL = externalGroupOrgRoleMappingDALFactory(db);
+  const authCredentialHistoryDAL = authCredentialHistoryDALFactory(db);
 
   const permissionService = permissionServiceFactory({
     permissionDAL,
@@ -496,7 +499,8 @@ export const registerRoutes = async (
     tokenService,
     smtpService,
     authDAL,
-    userDAL
+    userDAL,
+    authCredentialHistoryDAL
   });
 
   const projectBotService = projectBotServiceFactory({ permissionService, projectBotDAL, projectDAL });
@@ -1256,6 +1260,8 @@ export const registerRoutes = async (
     externalGroupOrgRoleMappingDAL
   });
 
+  const authCredentialHistoryService = authCredentialHistoryServiceFactory({ userDAL, authCredentialHistoryDAL });
+
   await superAdminService.initServerCfg();
   //
   // setup the communication with license key server
@@ -1268,6 +1274,7 @@ export const registerRoutes = async (
 
   // inject all services
   server.decorate<FastifyZodProvider["services"]>("services", {
+    authCredentialHistory: authCredentialHistoryService,
     login: loginService,
     password: passwordService,
     signup: signupService,

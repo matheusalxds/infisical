@@ -1,9 +1,10 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-import { SecretEncryptionAlgo, SecretKeyEncoding } from "@app/db/schemas";
+import { SecretEncryptionAlgo, SecretKeyEncoding, TUserEncryptionKeys } from "@app/db/schemas";
 import { getConfig } from "@app/lib/config/env";
 import { generateSrpServerKey, srpCheckClientProof } from "@app/lib/crypto";
+import { TAuthCredentialHistoryDALFactory } from "@app/services/history/auth-credential-history-dal";
 
 import { TAuthTokenServiceFactory } from "../auth-token/auth-token-service";
 import { TokenType } from "../auth-token/auth-token-types";
@@ -18,6 +19,7 @@ type TAuthPasswordServiceFactoryDep = {
   userDAL: TUserDALFactory;
   tokenService: TAuthTokenServiceFactory;
   smtpService: TSmtpService;
+  authCredentialHistoryDAL: TAuthCredentialHistoryDALFactory;
 };
 
 export type TAuthPasswordFactory = ReturnType<typeof authPaswordServiceFactory>;
@@ -25,7 +27,8 @@ export const authPaswordServiceFactory = ({
   authDAL,
   userDAL,
   tokenService,
-  smtpService
+  smtpService,
+  authCredentialHistoryDAL
 }: TAuthPasswordServiceFactoryDep) => {
   /*
    * Pre setup for pass change with srp protocol
@@ -80,6 +83,7 @@ export const authPaswordServiceFactory = ({
 
     const appCfg = getConfig();
     const hashedPassword = await bcrypt.hash(password, appCfg.BCRYPT_SALT_ROUND);
+    const getCurrentKey = await userDAL.findUserEncKeyLeanByUserId(userId);
     await userDAL.updateUserEncryptionByUserId(userId, {
       encryptionVersion: 2,
       protectedKey,
@@ -94,10 +98,18 @@ export const authPaswordServiceFactory = ({
       clientPublicKey: null,
       hashedPassword
     });
+    await authCredentialHistoryDAL.createPasswordHistory(getCurrentKey as unknown as TUserEncryptionKeys);
 
     if (tokenVersionId) {
       await tokenService.clearTokenSessionById(userEnc.userId, tokenVersionId);
     }
+  };
+
+  const createPasswordHistory = async ({ userId }: TChangePasswordDTO): Promise<boolean> => {
+    const userEnc = await userDAL.findUserEncKeyByUserId(userId);
+    if (!userEnc) throw new Error("Unauthorized");
+    const getCurrentKey = await userDAL.findUserEncKeyLeanByUserId(userId);
+    return authCredentialHistoryDAL.createPasswordHistory(getCurrentKey as unknown as TUserEncryptionKeys);
   };
 
   /*
@@ -261,6 +273,7 @@ export const authPaswordServiceFactory = ({
   return {
     generateServerPubKey,
     changePassword,
+    createPasswordHistory,
     resetPasswordByBackupKey,
     sendPasswordResetEmail,
     verifyPasswordResetEmail,

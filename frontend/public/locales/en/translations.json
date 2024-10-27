@@ -1,4 +1,23 @@
 {
+  "user-secrets": {
+    "title": "User Secrets",
+    "modal": {
+      "update": {
+        "title": "Update credentials",
+        "subtitle": "Avoid to use old passwords"
+      },
+      "delete": {
+        "title": "Delete already used credentials"
+      }
+    },
+    "tabs": {
+      "first-title": "Credential",
+      "first-subtitle": "Credential History"
+    },
+    "btns": {
+      "update-credentials": "Update"
+    }
+  },
   "activity": {
     "title": "Audit Logs",
     "subtitle": "Event history for this Infisical project.",

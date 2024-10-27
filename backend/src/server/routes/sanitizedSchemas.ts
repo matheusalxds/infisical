@@ -10,6 +10,7 @@ import {
   UsersSchema
 } from "@app/db/schemas";
 import { ProjectPermissionActions, ProjectPermissionSub } from "@app/ee/services/permission/project-permission";
+import { maskField } from "@app/utils/mask-data";
 
 import { UnpackedPermissionSchema } from "./santizedSchemas/permission";
 
@@ -100,6 +101,15 @@ export const secretRawSchema = z.object({
   metadata: z.unknown().nullable().optional(),
   createdAt: z.date(),
   updatedAt: z.date()
+});
+
+export const sanitizedPassHistorySchema = z.object({
+  id: z.string(),
+  hashedPassword: z.string().transform(maskField),
+  createdAt: z.date(),
+  email: z.string(),
+  userId: z.string(),
+  username: z.string()
 });
 
 export const ProjectPermissionSchema = z.object({

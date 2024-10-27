@@ -191,3 +191,12 @@ export type TokenVersion = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type CredentialHistory = {
+  id: string;
+  hashedPassword: string;
+  createdAt: string;
+  email: string;
+  userId: string;
+  username: string;
+};
